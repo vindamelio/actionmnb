@@ -1,0 +1,69 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+
+def gitTag = System.getenv("GITHUB_REF_TYPE") == "tag" ? System.getenv("GITHUB_REF_NAME") : null
+def gitSha = System.getenv("GITHUB_SHA")?.take(7) ?: "local"
+def gitVer = project.findProperty("gpr.version") ?: "0.0.0"
+def gitRel = project.findProperty("gpr.release") ?: null
+
+println("task-producer gradle.properties: gitVer=${gitVer} ${gitRel} ${gitSha} ${gitTag} ")
+
+//version = gitTag != null
+//    ? gitTag.replaceFirst("^v", "")           // es. tag "v1.2.0" -> versione "1.2.0"
+//    : "${gitVer}-${gitSha}"              // es. "0.0.0-SNAPSHOT-a1b2c3d"
+
+version = gitRel != null
+    ? "${gitVer}"                              // es. tag "v1.2.0" -> versione "1.2.0"
+    : "${gitVer}-SNAPSHOT-${gitSha}"           // es. "0.0.0-SNAPSHOT-a1b2c3d"
+
+//version = '1.0.1'
+
+
+println("task-producer version: ${version}")
+
+group = 'cmx.vincenzo'
+
+repositories {
+    //mavenCentral()
+    maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/vindamelio/actionma")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+}
+
+dependencies {
+    // gradleApi() serve solo in compilazione: a runtime le classi
+    // sono già fornite dal classloader di Gradle, quindi NON va
+    // messa come implementation (altrimenti finisce, errata, nel POM)
+    compileOnly gradleApi()
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/vindamelio/actionma")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}

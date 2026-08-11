@@ -1,0 +1,96 @@
+
+
+
+buildscript {
+
+    def gitTag = System.getenv("GITHUB_REF_TYPE") == "tag" ? System.getenv("GITHUB_REF_NAME") : null
+    def gitSha = System.getenv("GITHUB_SHA")?.take(7) ?: "local"
+    def gitVer = project.findProperty("gpr.version") ?: "0.0.0"
+    def gitRel = project.findProperty("gpr.release") ?: null
+
+    println("task-producer gradle.properties: gitVer=${gitVer} ${gitRel} ${gitSha} ${gitTag} ")
+
+    //version = gitTag != null
+    //    ? gitTag.replaceFirst("^v", "")           // es. tag "v1.2.0" -> versione "1.2.0"
+    //    : "${gitVer}-${gitSha}"                   // es. "0.0.0-SNAPSHOT-a1b2c3d"
+
+    version = gitRel != null
+       ? "${gitVer}"                              // es. tag "v1.2.0" -> versione "1.2.0"
+       : "${gitVer}-SNAPSHOT-${gitSha}"           // es. "0.0.0-SNAPSHOT-a1b2c3d"
+
+    println("task-producer version:  ${version}")
+
+    repositories {
+        mavenLocal()
+        //mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/vindamelio/actionma")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    dependencies {
+        classpath "cmx.vincenzo:task-producer:${version}"
+        
+    }
+}
+
+
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url = uri('https://maven.pkg.github.com/vindamelio/actionma')
+        credentials {
+            username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+            password = project.findProperty('gpr.token') ?: System.getenv('GITHUB_TOKEN')
+        }
+    }
+}
+
+dependencies {
+    // Serve al codice di test per compilare contro GreetingTask
+    //testImplementation 'cmx.vincenzo:task-producer:1.0.1'
+    testImplementation "cmx.vincenzo:task-producer:${version}"
+    //testImplementation project(':test-producer')
+    
+    testImplementation gradleApi()
+    testImplementation gradleTestKit()
+
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.register('greet', cmx.vincenzo.GreetingTaska) {
+    message.set('Ciao dal sottoprogetto consumer!')
+}
+tasks.register('testGreetingTask', Test) {
+    description = 'Esegue solo i test relativi a GreetingTaska'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching "cmx.vincenzo.GreetingTaskaTest"
+    }
+}
+
+test {
+    useJUnitPlatform()
+
+    jvmArgs(
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+    )
+}
+
+

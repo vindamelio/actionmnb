@@ -1,0 +1,43 @@
+name: Variables
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  job1:
+    name: job1
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: job1 step1
+        run: |
+          echo "Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Git Version: ${{ env.gitVer }}"
+          echo "Git SHA: ${{ env.gitSha }}"
+          echo "Git Tag: ${{ env.gitTag }}"
+
+  triage:
+    name: triage
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: triage step1
+        uses: actions/labeler@v6
+        with:
+          repo-token: ${{ secrets.token }}
+          configuration-path: ${{ inputs.config-path }}
+      - name: triage step2
+        run: |
+            echo "repo-token: $repo-token"
+            echo "configuration-path: $configuration-path"
+            echo "repo-token: ${{ secrets.token }}"
+            echo "configuration-path: ${{ inputs.config-path }}"
+

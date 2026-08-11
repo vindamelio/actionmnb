@@ -1,0 +1,43 @@
+name: Tag task-producer
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  #publish:
+  publish-and-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Publish to GitHub Packages
+        #run: ./gradlew :task-producer:publish
+        run: ./gradlew publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF_TYPE: tag
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      #- name: Build and test task-consumer
+      #  run: ./gradlew :task-consumer:build
+      #  env:
+      #    GITHUB_ACTOR: ${{ github.actor }}
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #    GITHUB_REF_TYPE: tag
+      #    GITHUB_REF_NAME: ${{ github.ref_name }}
