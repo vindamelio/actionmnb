@@ -43,9 +43,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.register('greet', cmx.vincenzo.GreetingTaska) {
-    message.set('Ciao dal sottoprogetto consumer!')
-}
+
 tasks.register('testGreetingTask', Test) {
     description = 'Esegue solo i test relativi a GreetingTaska'
     group = 'verification'
