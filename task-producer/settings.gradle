@@ -7,8 +7,5 @@
  * in the user manual at https://docs.gradle.org/7.0/userguide/multi_project_builds.html
  */
 
-rootProject.name = "actionmnb"
-include 'task-producer'
-includeBuild 'task-consumer'
+rootProject.name = "task-producer"
 println("This is executed during the initialization phase.")
-
