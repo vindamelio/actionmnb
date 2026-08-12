@@ -1,42 +1,23 @@
-buildscript {
-
-    def gitTag = System.getenv("GITHUB_REF_TYPE") == "tag" ? System.getenv("GITHUB_REF_NAME") : null
-    def gitSha = System.getenv("GITHUB_SHA")?.take(7) ?: "local"
-    def gitVer = project.findProperty("gpr.version") ?: "0.0.0"
-    def gitRel = project.findProperty("gpr.release") ?: null
-
-    println("task-producer gradle.properties: gitVer=${gitVer} ${gitRel} ${gitSha} ${gitTag} ")
-
-    version = gitRel != null
-       ? "${gitVer}"                              // es. tag "v1.2.0" -> versione "1.2.0"
-       : "${gitVer}-SNAPSHOT-${gitSha}"           // es. "0.0.0-SNAPSHOT-a1b2c3d"
-
-    println("task-producer version:  ${version}")
-
-    repositories {
-        mavenLocal()
-        //mavenCentral()
-        maven {
-            url = uri("https://maven.pkg.github.com/vindamelio/actionma")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
-    dependencies {
-        classpath "cmx.vincenzo:task-producer:${version}"
-        
-    }
-}
-
-
 plugins {
     id 'java'
-    id 'java-gradle-plugin'
+    //id 'java-gradle-plugin'
 }
 
+def gitTag = System.getenv("GITHUB_REF_TYPE") == "tag" ? System.getenv("GITHUB_REF_NAME") : null
+def gitSha = System.getenv("GITHUB_SHA")?.take(7) ?: "local"
+def gitVer = project.findProperty("gpr.version") ?: "0.0.0"
+def gitRel = project.findProperty("gpr.release") ?: null
+
+println("task-producer gradle.properties: gitVer=${gitVer} ${gitRel} ${gitSha} ${gitTag} ")
+
+version = gitRel != null
+    ? "${gitVer}"                              // es. tag "v1.2.0" -> versione "1.2.0"
+    : "${gitVer}-SNAPSHOT-${gitSha}"           // es. "0.0.0-SNAPSHOT-a1b2c3d"
+
+println("task-producer version:  ${version}")
+
 repositories {
+
     mavenLocal()
     mavenCentral()
     maven {
