@@ -1,6 +1,6 @@
 package cmx.vincenzo;
 
-import cmx.vincenzo.GreetingTaska;
+
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class GreetingTaskaFunctionalTest {
             "        mavenLocal()\n" +
             "        mavenCentral()\n" +
             "        maven {\n" +
-            "            url = uri('https://maven.pkg.github.com/vindamelio/actionma')\n" +
+            "            url = uri('https://maven.pkg.github.com/vindamelio/actionmnb')\n" +
             "            credentials {\n" +
             "                username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')\n" +
             "                password = project.findProperty('gpr.token') ?: System.getenv('GITHUB_TOKEN')\n" +

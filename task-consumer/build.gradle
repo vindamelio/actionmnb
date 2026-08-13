@@ -2,13 +2,23 @@ plugins {
     id 'java'
     //id 'java-gradle-plugin'
 }
+def envProps = new Properties()
+file("${rootDir}/.env").with { file ->
+        if (file.exists()) {
+            file.withInputStream { envProps.load(it) }
+        }
+}
+
+def use = envProps.getProperty('GITHUB_ACTOR') ?: System.getenv('GITHUB_ACTOR')
+def psw = envProps.getProperty('GITHUB_TOKEN') ?: System.getenv('GITHUB_TOKEN')
+
 
 def gitTag = System.getenv("GITHUB_REF_TYPE") == "tag" ? System.getenv("GITHUB_REF_NAME") : null
 def gitSha = System.getenv("GITHUB_SHA")?.take(7) ?: "local"
 def gitVer = project.findProperty("gpr.version") ?: "0.0.0"
 def gitRel = project.findProperty("gpr.release") ?: null
 
-println("task-producer gradle.properties: gitVer=${gitVer} ${gitRel} ${gitSha} ${gitTag} ")
+println("task-producer gradle.properties: gitVer=${gitVer} ${gitRel} ${gitSha} ${gitTag} ${use} ${psw}")
 
 version = gitRel != null
     ? "${gitVer}"                              // es. tag "v1.2.0" -> versione "1.2.0"
@@ -23,9 +33,9 @@ repositories {
     maven {
         url = uri('https://maven.pkg.github.com/vindamelio/actionmnb')
         credentials {
-            username = project.findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
-            password = project.findProperty('gpr.token') ?: System.getenv('GITHUB_TOKEN')
-        }
+                username = use
+                password = psw
+                }
     }
 }
 
